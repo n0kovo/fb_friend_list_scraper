@@ -36,7 +36,10 @@ outfile_path = "./scraped_friends.txt"
 def change_language():
     print("[+] Non-english detected. Changing language to English (UK)")
     driver.get("https://m.facebook.com/language/")
-    english_btn = driver.find_element(By.XPATH, '//*[@value="en_GB"]')
+    try:
+        english_btn = driver.find_element(By.XPATH, '//*[@value="English (UK)"]')
+    except NoSuchElementException:
+        english_btn = driver.find_element(By.XPATH, '//*[@value="en_gb"]')
     english_btn.click()
 
 
