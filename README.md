@@ -14,3 +14,6 @@ user_to_scrape = "USERNAME_TO_SCRAPE_HERE"
 outfile_path = "./scraped_friends.txt"
 ```
 * Run script: `python scraper.py`
+
+### NOTE:
+Facebook changes it's source code regularly, so the script might break from time to time. Please open an issue if something doesn't work and I'll take a look at it. Pull requests are welcome as well.
