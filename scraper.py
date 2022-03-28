@@ -24,6 +24,7 @@ from bs4 import BeautifulSoup
 from random import randint
 from tqdm import tqdm
 from math import ceil
+import re
 
 
 email = "YOUR_EMAIL_HERE"
@@ -32,19 +33,28 @@ user_to_scrape = "USERNAME_TO_SCRAPE_HERE"
 outfile_path = "./scraped_friends.txt"
 
 
+def change_language():
+    print("[+] Non-english detected. Changing language to English (UK)")
+    driver.get("https://m.facebook.com/language/")
+    english_btn = driver.find_element(By.XPATH, '//*[@value="en_GB"]')
+    english_btn.click()
+
+
 def login(email, password):
     print("[+] Requesting login page")
     driver.get("https://m.facebook.com/login")
-    cookie_btn = driver.find_element(By.XPATH, '//*[@id="accept-cookie-banner-label"]')
+
+    forgot_pw = driver.find_element(By.XPATH, '//*[@id="forgot-password-link"]')
+    if forgot_pw.text != 'Forgotten password?':
+        change_language()
+
+    cookie_btn = driver.find_element(By.XPATH, '//*[@value="Only Allow Essential Cookies"]')
     cookie_btn.click()
     email_input = driver.find_element(By.XPATH, '//*[@id="m_login_email"]')
     email_input.send_keys(email)
     password_input = driver.find_element(By.XPATH, '//*[@id="m_login_password"]')
     password_input.send_keys(password)
-    login_btn = driver.find_element(
-        By.XPATH,
-        "/html/body/div[1]/div/div[2]/div[1]/div/div/div[2]/div/div[3]/form/div[5]/div[1]/button",
-    )
+    login_btn = driver.find_element(By.XPATH,'//*[@value="Log In"]',)
     print("[+] Logging in")
     login_btn.click()
     wait = WebDriverWait(driver, 10)
@@ -54,12 +64,10 @@ def login(email, password):
 def get_total_friends():
     print("[+] Getting total friends count")
     driver.get(f"https://m.facebook.com/{user_to_scrape}")
-    # friends_count = driver.find_element(By.CLASS_NAME, '_7-1j')
     soup = BeautifulSoup(driver.page_source, "html.parser")
     friends_count_div = soup.find("div", class_="_7-1j")
-    friends_count = (
-        friends_count_div.get_text().replace(",", "").replace(" friends", "").strip()
-    )
+    friends_count = re.sub(r'\D', '', friends_count_div.get_text())
+
     print(f"[+] Friends count = {friends_count}")
     return int(friends_count)
 
