@@ -24,7 +24,7 @@ options:
                         Path of the output file. (Default: ./scraped_friends.txt)
   -q, --headless        Run webdriver in headless mode.
 
-Examples:
+examples:
         fbfriendlistscraper -e your@email.com -p YourPassword123 -u someusername.123 -o my_file.txt
         fbfriendlistscraper --email your@email.com --username another.user --headless
 ```
