@@ -27,13 +27,8 @@ from math import ceil
 import re
 
 
-email = "YOUR_EMAIL_HERE"
-password = "YOUR_PASSWORD_HERE"
-user_to_scrape = "USERNAME_TO_SCRAPE_HERE"
-outfile_path = "./scraped_friends.txt"
 
-
-def change_language():
+def change_language(driver):
     print("[+] Non-english detected. Changing language to English (UK)")
     driver.get("https://m.facebook.com/language/")
     try:
@@ -43,13 +38,13 @@ def change_language():
     english_btn.click()
 
 
-def login(email, password):
+def login(driver, email, password):
     print("[+] Requesting login page")
     driver.get("https://m.facebook.com/login")
 
     forgot_pw = driver.find_element(By.XPATH, '//*[@id="forgot-password-link"]')
     if forgot_pw.text != 'Forgotten password?':
-        change_language()
+        change_language(driver)
     
     try:
         cookie_btn = driver.find_element(By.XPATH, '//*[@value="Only Allow Essential Cookies"]')
@@ -68,7 +63,7 @@ def login(email, password):
     wait.until(EC.url_changes("https://m.facebook.com/login"))
 
 
-def get_total_friends():
+def get_total_friends(driver, user_to_scrape):
     print("[+] Getting total friends count")
     driver.get(f"https://m.facebook.com/{user_to_scrape}")
     soup = BeautifulSoup(driver.page_source, "html.parser")
@@ -79,7 +74,7 @@ def get_total_friends():
     return int(friends_count)
 
 
-def scrape_profiles():
+def scrape_profiles(driver, outfile_path, pbar=None):
     soup = BeautifulSoup(driver.page_source, "html.parser")
     profiles = soup.find_all("div", class_="_84l2")
     scraped_profiles = []
@@ -92,14 +87,15 @@ def scrape_profiles():
             profilestring = f"{name} ({link})"
             scraped_profiles.append(profilestring)
             outfile.write(f"{profilestring}\n")
+    if pbar:
+        for profile in scraped_profiles:
+            pbar.write(profile)
+        pbar.write
 
-    for profile in scraped_profiles:
-        pbar.write(profile)
-    pbar.write
 
-
-def remove_visible():
-    pbar.write("[+] Removing scraped elements from page")
+def remove_visible(driver, pbar=None):
+    if pbar:
+        pbar.write("[+] Removing scraped elements from page")
     soup = BeautifulSoup(driver.page_source, "html.parser")
     profile_classes = soup.find_all("div", class_="_7om2")
     for i in profile_classes[:-1]:
@@ -112,8 +108,9 @@ def remove_visible():
         )
 
 
-def cleanup():
-    pbar.write("[+] Cleaning up leftover elements\n")
+def cleanup(driver, pbar=None):
+    if pbar:
+        pbar.write("[+] Cleaning up leftover elements\n")
     soup = BeautifulSoup(driver.page_source, "html.parser")
     profile_slots = soup.find_all("div", class_="_55wp _5909 _5pxa _8yo0")
 
@@ -150,12 +147,14 @@ def cleanup():
 
         if has_child:
             break
-    pbar.write("Waiting a bit...")
+    if pbar:
+        pbar.write("Waiting a bit...")
     sleep(10)
 
 
-def scroll_down():
-    pbar.write("[+] Scrolling to the bottom")
+def scroll_down(driver, pbar=None):
+    if pbar:
+        pbar.write("[+] Scrolling to the bottom")
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
 
@@ -175,25 +174,39 @@ def wait(range_start, range_stop):
     waitbar.write("")
 
 
+def do_scrape(driver, email, password, user_to_scrape, outfile_path):
+    login(driver, email, password)
+    total_friends = get_total_friends(driver, user_to_scrape)
+    print("[+] Requesting friends page")
+    driver.get(f"https://m.facebook.com/{user_to_scrape}/friends")
+    print("[+] Starting...\n")
 
-geckodriver_autoinstaller.install()
-driver = webdriver.Firefox()
-login(email, password)
-total_friends = get_total_friends()
-print("[+] Requesting friends page")
-driver.get(f"https://m.facebook.com/{user_to_scrape}/friends")
-print("[+] Starting...\n")
+    pbar = tqdm(total=total_friends)
+    pbar.display()
+    pbar.set_description("Total progress")
 
-pbar = tqdm(total=total_friends)
-pbar.display()
-pbar.set_description("Total progress")
+    total_pages = ceil(total_friends / 36)
+    for i, page in enumerate(range(total_pages)):
+        pbar.write(f"------------ Scraping page {i+1} of {total_pages}: ------------\n")
+        scrape_profiles(driver, outfile_path, pbar)
+        pbar.update(24)
+        wait(240, 320)
+        scroll_down(driver, pbar)
+        remove_visible(driver, pbar)
+        cleanup(driver, pbar)
 
-total_pages = ceil(total_friends / 36)
-for i, page in enumerate(range(total_pages)):
-    pbar.write(f"------------ Scraping page {i+1} of {total_pages}: ------------\n")
-    scrape_profiles()
-    pbar.update(24)
-    wait(240, 320)
-    scroll_down()
-    remove_visible()
-    cleanup()
+
+def main():
+    geckodriver_autoinstaller.install()
+    driver = webdriver.Firefox()
+
+    email = "YOUR_EMAIL_HERE"
+    password = "YOUR_PASSWORD_HERE"
+    user_to_scrape = "USERNAME_TO_SCRAPE_HERE"
+    outfile_path = "./scraped_friends.txt"
+    
+    do_scrape(driver, email, password, user_to_scrape, outfile_path)
+
+
+if __name__ == "__main__":
+    main()
