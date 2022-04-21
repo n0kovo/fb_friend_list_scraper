@@ -1,3 +1,6 @@
 
 scraped_friends.txt
 geckodriver.log
+build/
+dist/
+fb_friend_list_scraper.egg-info/
