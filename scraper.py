@@ -50,9 +50,13 @@ def login(email, password):
     forgot_pw = driver.find_element(By.XPATH, '//*[@id="forgot-password-link"]')
     if forgot_pw.text != 'Forgotten password?':
         change_language()
+    
+    try:
+        cookie_btn = driver.find_element(By.XPATH, '//*[@value="Only Allow Essential Cookies"]')
+        cookie_btn.click()
+    except selenium.common.exceptions.NoSuchElementException:
+        pass
 
-    cookie_btn = driver.find_element(By.XPATH, '//*[@value="Only Allow Essential Cookies"]')
-    cookie_btn.click()
     email_input = driver.find_element(By.XPATH, '//*[@id="m_login_email"]')
     email_input.send_keys(email)
     password_input = driver.find_element(By.XPATH, '//*[@id="m_login_password"]')
