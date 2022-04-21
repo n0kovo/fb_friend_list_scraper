@@ -13,19 +13,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import argparse
+import getpass
+import re
+from math import ceil
+from random import randint
+from time import sleep
+
+import pyautogecko
+from bs4 import BeautifulSoup
+from sys import argv
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
-import geckodriver_autoinstaller
-from time import sleep
-from bs4 import BeautifulSoup
-from random import randint
 from tqdm import tqdm
-from math import ceil
-import re
-
 
 
 def change_language(driver):
@@ -197,14 +201,37 @@ def do_scrape(driver, email, password, user_to_scrape, outfile_path):
 
 
 def main():
-    geckodriver_autoinstaller.install()
-    driver = webdriver.Firefox()
-
-    email = "YOUR_EMAIL_HERE"
-    password = "YOUR_PASSWORD_HERE"
-    user_to_scrape = "USERNAME_TO_SCRAPE_HERE"
-    outfile_path = "./scraped_friends.txt"
+    parser = argparse.ArgumentParser(
+        description='Tool to scrape names and usernames from large friend lists on Facebook, without being rate limited',
+        epilog=f"""examples:
+        fbfriendlistscraper -e your@email.com -p YourPassword123 -u someusername.123 -o my_file.txt
+        fbfriendlistscraper --email your@email.com --username another.user --headless""", formatter_class=argparse.RawDescriptionHelpFormatter)
     
+    parser.add_argument('-e', '--email', action="store", required=True, help='Email address to login with.')
+    parser.add_argument('-p', '--password', action="store", help='Password to login with. If not supplied you will be prompted.')
+    parser.add_argument('-u', '--username', action="store", required=True, help='Username of the user to scrape.')
+    parser.add_argument('-o', '--outfile', action="store", default="./scraped_friends.txt", help='Path of the output file. (Default: ./scraped_friends.txt)')
+    parser.add_argument('-q', '--headless', action='store_true', help='Run webdriver in headless mode.')
+
+    args = parser.parse_args()
+
+
+
+    email = args.email
+    user_to_scrape = args.username
+    outfile_path = args.outfile
+    if args.password:
+        password = args.password
+    else:
+        password = getpass.getpass(prompt=f'Password for {args.email}: ')
+    
+    firefox_options = Options()
+    pyautogecko.install()
+    
+    if args.headless:
+        firefox_options.headless = True
+    driver = webdriver.Firefox(options=firefox_options)
+
     do_scrape(driver, email, password, user_to_scrape, outfile_path)
 
 
