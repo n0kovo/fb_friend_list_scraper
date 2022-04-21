@@ -54,7 +54,7 @@ def login(email, password):
     try:
         cookie_btn = driver.find_element(By.XPATH, '//*[@value="Only Allow Essential Cookies"]')
         cookie_btn.click()
-    except selenium.common.exceptions.NoSuchElementException:
+    except NoSuchElementException:
         pass
 
     email_input = driver.find_element(By.XPATH, '//*[@id="m_login_email"]')
