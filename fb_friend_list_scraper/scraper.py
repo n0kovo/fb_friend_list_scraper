@@ -48,7 +48,7 @@ console = Console()
 
 def print_banner():
     credits = "[blue][italic]by narkopolo[/italic][/blue]"
-    version = "[blue][italic]v0.3.2[/italic][/blue]"
+    version = "[blue][italic]v0.3.3[/italic][/blue]"
     lol = "[grey30](banners are cool, shut up)[/grey30]"
     banner = f"""    ______    ____     _                _____      __                                      
    / __/ /_  / __/____(_)__  ____  ____/ / (_)____/ /____________________  ____  ___  _____
@@ -294,6 +294,7 @@ def main():
     print_banner()
     
     parser = argparse.ArgumentParser(
+        prog='fbfriendlistscraper',
         description='Tool to scrape names and usernames from large friend lists on Facebook, without being rate limited',
         epilog=f"""examples:
         fbfriendlistscraper -e your@email.com -p YourPassword123 -u someusername.123 -o my_file.txt

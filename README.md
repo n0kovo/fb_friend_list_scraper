@@ -8,7 +8,7 @@ Tool to scrape names and usernames from large friend lists on Facebook, without 
 
 ### Usage:
 ```
-usage: scraper.py [-h] -e EMAIL [-p PASSWORD] -u USERNAME [-o OUTFILE] [-w] [-q] [-x] [-s SLEEPMULTIPLIER] [-i PROXY] [-c CMD]
+usage: fbfriendlistscraper [-h] -e EMAIL [-p PASSWORD] -u USERNAME [-o OUTFILE] [-w] [-q] [-x] [-s SLEEPMULTIPLIER] [-i PROXY] [-c CMD]
 
 Tool to scrape names and usernames from large friend lists on Facebook, without being rate limited
 
