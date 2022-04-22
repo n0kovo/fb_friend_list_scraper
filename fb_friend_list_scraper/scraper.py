@@ -48,7 +48,7 @@ console = Console()
 
 def print_banner():
     credits = "[blue][italic]by narkopolo[/italic][/blue]"
-    version = "[blue][italic]v0.3.1[/italic][/blue]"
+    version = "[blue][italic]v0.3.2[/italic][/blue]"
     lol = "[grey30](banners are cool, shut up)[/grey30]"
     banner = f"""    ______    ____     _                _____      __                                      
    / __/ /_  / __/____(_)__  ____  ____/ / (_)____/ /____________________  ____  ___  _____
@@ -298,9 +298,8 @@ def main():
         epilog=f"""examples:
         fbfriendlistscraper -e your@email.com -p YourPassword123 -u someusername.123 -o my_file.txt
         fbfriendlistscraper --email your@email.com --username another.user --headless -s 2 -x
-        fbfriendlistscraper -e your@email.com -u username.johnson -w --proxy socks5://127.0.0.1:9050
+        fbfriendlistscraper -e your@email.com -u username.johnson -w --proxy socks5://127.0.0.1:9050 --cmd "killall -HUP tor"
         fbfriendlistscraper -e your@email.com -u xxuserxx --headless --cmd "mullvad relay set provider Quadranet"
-        fbfriendlistscraper -e your@email.com -u markzuckerburger -w -o ./test.txt --cmd "killall -HUP tor"
         """, formatter_class=argparse.RawDescriptionHelpFormatter)
     
     parser.add_argument('-e', '--email', action="store", required=True, help='Email address to login with.')
