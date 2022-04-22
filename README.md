@@ -1,5 +1,8 @@
-# Facebook Friend List Scraper
-Tool to scrape names and usernames from large friend lists on Facebook, without being rate limited.
+<img src="https://user-images.githubusercontent.com/16690056/164680272-daa6bc23-594a-4c7f-8593-f52dc063152f.png">
+
+## Facebook Friend List Scraper
+
+OSINT tool to scrape names and usernames from large friend lists on Facebook, without being rate limited.
 
 ### Getting started:
 * Install using pip: `python -m pip install fb-friend-list-scraper`
@@ -7,6 +10,7 @@ Tool to scrape names and usernames from large friend lists on Facebook, without 
 * Run with `-h` or `--help` to show usage information.
 
 ### Usage:
+
 ```
 usage: fbfriendlistscraper [-h] -e EMAIL [-p PASSWORD] -u USERNAME [-o OUTFILE] [-w] [-q] [-x] [-s SLEEPMULTIPLIER] [-i PROXY] [-c CMD]
 
