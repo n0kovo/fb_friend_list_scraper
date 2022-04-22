@@ -18,22 +18,66 @@ import getpass
 import re
 from math import ceil
 from random import randint
+from sys import argv, stdout
 from time import sleep
 
 import pyautogecko
+from art import text2art
 from bs4 import BeautifulSoup
-from sys import argv
+from rich import box, print
+from rich.console import Console
+from rich.progress import Progress, track
+from rich.rule import Rule
+from rich.table import Table
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from tqdm import tqdm
+
+
+
+def logprint(text):
+    text = f"[cyan][+][/cyan] [blue]{text}[/blue]"
+    console.print(text)
+    
+
+console = Console()
+
+
+def print_banner():
+    credits = "[blue][italic]by narkopolo[/italic][/blue]"
+    version = "[blue][italic]v0.3.0[/italic][/blue]"
+    lol = "[grey30](banners are cool, shut up)[/grey30]"
+    banner = f"""    ______    ____     _                _____      __                                      
+   / __/ /_  / __/____(_)__  ____  ____/ / (_)____/ /____________________  ____  ___  _____
+  / /_/ __ \/ /_/ ___/ / _ \/ __ \/ __  / / / ___/ __/ ___/ ___/ ___/ __ `/ __ \/ _ \/ ___/
+ / __/ /_/ / __/ /  / /  __/ / / / /_/ / / (__  ) /_(__  ) /__/ /  / /_/ / /_/ /  __/ /    
+/_/ /_.___/_/ /_/  /_/\___/_/ /_/\__,_/_/_/____/\__/____/\___/_/   \__,_/ .___/\___/_/      
+{lol}                                     {version} /_/ {credits}                 
+
+"""
+    for i, line in enumerate(banner.splitlines()):
+        if i == 0:
+            line = line.replace("_", "[white]_[/white]")
+        if i == 1:
+            line = line.replace("/_", "/[white]_[/white]")
+            line = line.replace("__", "[white]__[/white]")
+            line = line.replace("_ ", "[white]_ [/white]")
+            line = line.replace("_", "[white]_[/white]")
+        
+        if i in [0, 1, 4, 5]:
+            console.print(line, style="red", highlight=False)
+        elif i == 3:
+            console.print(line, style="cyan", highlight=False)
+        else:
+            console.print(line, style="blue", highlight=False)
+
 
 
 def change_language(driver):
-    print("[+] Non-english detected. Changing language to English (UK)")
+    logprint("Non-english detected. Changing language to English (UK)")
     driver.get("https://m.facebook.com/language/")
     try:
         english_btn = driver.find_element(By.XPATH, '//*[@value="English (UK)"]')
@@ -43,63 +87,70 @@ def change_language(driver):
 
 
 def login(driver, email, password):
-    print("[+] Requesting login page")
+    logprint("Requesting login page")
     driver.get("https://m.facebook.com/login")
 
     forgot_pw = driver.find_element(By.XPATH, '//*[@id="forgot-password-link"]')
     if forgot_pw.text != 'Forgotten password?':
         change_language(driver)
-    
+
     try:
         cookie_btn = driver.find_element(By.XPATH, '//*[@value="Only Allow Essential Cookies"]')
-        cookie_btn.click()
     except NoSuchElementException:
-        pass
+        cookie_btn = driver.find_element(By.XPATH,'//*[@value="Only allow essential cookies"]',)
+        cookie_btn.click()
 
     email_input = driver.find_element(By.XPATH, '//*[@id="m_login_email"]')
     email_input.send_keys(email)
     password_input = driver.find_element(By.XPATH, '//*[@id="m_login_password"]')
     password_input.send_keys(password)
     login_btn = driver.find_element(By.XPATH,'//*[@value="Log In"]',)
-    print("[+] Logging in")
+    logprint("Submitting login form")
     login_btn.click()
     wait = WebDriverWait(driver, 10)
     wait.until(EC.url_changes("https://m.facebook.com/login"))
 
 
 def get_total_friends(driver, user_to_scrape):
-    print("[+] Getting total friends count")
+    logprint("Getting total friends count")
     driver.get(f"https://m.facebook.com/{user_to_scrape}")
     soup = BeautifulSoup(driver.page_source, "html.parser")
     friends_count_div = soup.find("div", class_="_7-1j")
-    friends_count = re.sub(r'\D', '', friends_count_div.get_text())
+    friends_count_text = friends_count_div.get_text()
+    
+    # Remove mutual friends string if present
+    friends_count_text = friends_count_text.split("(")[0]
+    friends_count = re.sub(r'\D', '', friends_count_text)
 
-    print(f"[+] Friends count = {friends_count}")
+    logprint(f"Friends count = {friends_count}")
     return int(friends_count)
 
 
-def scrape_profiles(driver, outfile_path, pbar=None):
+def scrape_profiles(driver, outfile_path, progress):
     soup = BeautifulSoup(driver.page_source, "html.parser")
     profiles = soup.find_all("div", class_="_84l2")
     scraped_profiles = []
+    
+    table = Table(show_header=True, show_edge=True, box=box.MINIMAL, expand=True, highlight=True, header_style="bold magenta")
+    table.add_column("Name", style="dim")
+    table.add_column("Profile URL")
 
-    with open(outfile_path, "a+") as outfile:
-        for div in profiles:
-            link = div.find("a")["href"][1:].replace("profile.php?id=", "")
-            link = f"https://www.fb.com/{link}"
-            name = div.get_text()
-            profilestring = f"{name} ({link})"
-            scraped_profiles.append(profilestring)
+    for div in profiles:
+        link = div.find("a")["href"][1:].replace("profile.php?id=", "")
+        link = f"https://www.fb.com/{link}"
+        name = div.get_text()
+        profilestring = f"{name} ({link})"
+
+        with open(outfile_path, "a+") as outfile:
             outfile.write(f"{profilestring}\n")
-    if pbar:
-        for profile in scraped_profiles:
-            pbar.write(profile)
-        pbar.write
+
+        table.add_row(f"[bold white]{name}[/bold white]", link)
+
+    progress.console.print(table)
 
 
-def remove_visible(driver, pbar=None):
-    if pbar:
-        pbar.write("[+] Removing scraped elements from page")
+def remove_visible(driver, progress):
+    logprint("Removing scraped elements from page")
     soup = BeautifulSoup(driver.page_source, "html.parser")
     profile_classes = soup.find_all("div", class_="_7om2")
     for i in profile_classes[:-1]:
@@ -112,9 +163,9 @@ def remove_visible(driver, pbar=None):
         )
 
 
-def cleanup(driver, pbar=None):
-    if pbar:
-        pbar.write("[+] Cleaning up leftover elements\n")
+def cleanup(driver, progress):
+
+    logprint("Cleaning up leftover elements")
     soup = BeautifulSoup(driver.page_source, "html.parser")
     profile_slots = soup.find_all("div", class_="_55wp _5909 _5pxa _8yo0")
 
@@ -151,56 +202,60 @@ def cleanup(driver, pbar=None):
 
         if has_child:
             break
-    if pbar:
-        pbar.write("Waiting a bit...")
-    sleep(10)
+
+    logprint("Waiting a bit...")
+    sleep(5)
 
 
-def scroll_down(driver, pbar=None):
-    if pbar:
-        pbar.write("[+] Scrolling to the bottom")
+def scroll_down(driver, progress):
+    logprint("Scrolling to the bottom")
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
 
-def wait(range_start, range_stop):
+def wait(range_start, range_stop, progress):
     wait_time = randint(range_start, range_stop)
-
     minutes = "%d.%d" % (wait_time / 60, wait_time % 60)
-    l_bar_ = f"Waiting {minutes} minutes: {{percentage:3.0f}}%|"
-    r_bar_ = "[{remaining}]"
-    wait_bar_format = f"{l_bar_}{{bar}}{r_bar_}"
-
-    with tqdm(total=wait_time * 5, bar_format=wait_bar_format) as waitbar:
-        waitbar.write("")
-        for second in range(wait_time * 5):
-            sleep(0.2)
-            waitbar.update(1)
-    waitbar.write("")
+    waitbar = progress.add_task(f"[green]Waiting {minutes} minutes", total=wait_time * 5)
+    progress.update(waitbar, advance=0)
+    
+    progress.console.print("")
+    for second in range(wait_time * 5):
+        sleep(0.2)
+        progress.advance(waitbar)
+    progress.update(waitbar, visible=False)
+    progress.console.print("")
 
 
 def do_scrape(driver, email, password, user_to_scrape, outfile_path):
-    login(driver, email, password)
-    total_friends = get_total_friends(driver, user_to_scrape)
-    print("[+] Requesting friends page")
-    driver.get(f"https://m.facebook.com/{user_to_scrape}/friends")
-    print("[+] Starting...\n")
+    progress = Progress(console=console)
+    
+    with progress.console.status("[bold magenta]Logging in...") as status:
+        login(driver, email, password)
+        
+    with progress:
+        total_friends = get_total_friends(driver, user_to_scrape)
+        logprint("Requesting friends page")
+        driver.get(f"https://m.facebook.com/{user_to_scrape}/friends")
+        logprint("Starting...\n")
+        
+        pbar = progress.add_task("[blue]Total progress", total=total_friends)
+        progress.update(pbar, advance=0)
 
-    pbar = tqdm(total=total_friends)
-    pbar.display()
-    pbar.set_description("Total progress")
-
-    total_pages = ceil(total_friends / 36)
-    for i, page in enumerate(range(total_pages)):
-        pbar.write(f"------------ Scraping page {i+1} of {total_pages}: ------------\n")
-        scrape_profiles(driver, outfile_path, pbar)
-        pbar.update(24)
-        wait(240, 320)
-        scroll_down(driver, pbar)
-        remove_visible(driver, pbar)
-        cleanup(driver, pbar)
+        total_pages = ceil(total_friends / 36)
+        for i, page in enumerate(range(total_pages)):
+            progress.console.print(Rule(title=f"Scraping page {i+1} of {total_pages}"))
+            progress.update(pbar, advance=24)
+            scrape_profiles(driver, outfile_path, progress)
+            #wait(240, 320, progress)
+            wait(1, 20, progress)
+            scroll_down(driver, progress)
+            remove_visible(driver, progress)
+            cleanup(driver, progress)
 
 
 def main():
+    print_banner()
+    
     parser = argparse.ArgumentParser(
         description='Tool to scrape names and usernames from large friend lists on Facebook, without being rate limited',
         epilog=f"""examples:
@@ -224,7 +279,9 @@ def main():
         password = args.password
     else:
         password = getpass.getpass(prompt=f'Password for {args.email}: ')
+        print("")
     
+    logprint("Starting webdriver")    
     firefox_options = Options()
     pyautogecko.install()
     
