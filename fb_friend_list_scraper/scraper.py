@@ -298,7 +298,7 @@ def main():
         epilog=f"""examples:
         fbfriendlistscraper -e your@email.com -p YourPassword123 -u someusername.123 -o my_file.txt
         fbfriendlistscraper --email your@email.com --username another.user --headless -s 2 -x
-        fbfriendlistscraper --e your@email.com -u username.johnson -w --proxy socks5://127.0.0.1:9050
+        fbfriendlistscraper -e your@email.com -u username.johnson -w --proxy socks5://127.0.0.1:9050
         fbfriendlistscraper -e your@email.com -u xxuserxx --headless --cmd "mullvad relay set provider Quadranet"
         fbfriendlistscraper -e your@email.com -u markzuckerburger -w -o ./test.txt --cmd "killall -HUP tor"
         """, formatter_class=argparse.RawDescriptionHelpFormatter)
