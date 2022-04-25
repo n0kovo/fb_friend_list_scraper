@@ -20,7 +20,7 @@ Tool to scrape names and usernames from large friend lists on Facebook, without 
 options:
   -h, --help            show this help message and exit
   -e EMAIL, --email EMAIL
-                        Email address to login with.
+                        Email address or phone number to login with.
   -p PASSWORD, --password PASSWORD
                         Password to login with. If not supplied you will be prompted. You really shouldn't use this for security reasons.
   -u USERNAME, --username USERNAME
