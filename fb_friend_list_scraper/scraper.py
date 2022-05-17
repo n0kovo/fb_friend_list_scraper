@@ -303,7 +303,7 @@ def main():
         fbfriendlistscraper -e your@email.com -u xxuserxx --headless --cmd "mullvad relay set provider Quadranet"
         """, formatter_class=argparse.RawDescriptionHelpFormatter)
     
-    parser.add_argument('-e', '--email', action="store", required=True, help='Email address to login with.')
+    parser.add_argument('-e', '--email', action="store", required=True, help='Email address/phone number/username to login with.')
     parser.add_argument('-p', '--password', action="store", help='Password to login with. If not supplied you will be prompted. You really shouldn\'t use this for security reasons.')
     parser.add_argument('-u', '--username', action="store", required=True, help='Username of the user to scrape.')
     parser.add_argument('-o', '--outfile', action="store", default="./scraped_friends.txt", help='Path of the output file. (Default: ./scraped_friends.txt)')
