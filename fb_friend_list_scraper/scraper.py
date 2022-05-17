@@ -52,7 +52,7 @@ console = Console()
 
 def print_banner():
     credits = "[blue][italic]by narkopolo[/italic][/blue]"
-    version = "[blue][italic]v0.3.4[/italic][/blue]"
+    version = "[blue][italic]v0.3.5[/italic][/blue]"
     lol = "[grey30](banners are cool, shut up)[/grey30]"
     banner = f"""    ______    ____     _                _____      __                                      
    / __/ /_  / __/____(_)__  ____  ____/ / (_)____/ /____________________  ____  ___  _____

@@ -1,8 +1,8 @@
-<img src="https://user-images.githubusercontent.com/16690056/168843658-4356f0a6-e94d-4080-b89b-7b48375d1dae.png">
+<img src="https://user-images.githubusercontent.com/16690056/168868887-0af568d1-fb99-409e-89c6-a779cd74924c.png">
 
 <p float="left">
 <img src="https://img.shields.io/badge/Built%20with-Python3-red" />
-<img src="https://img.shields.io/badge/Version-0.3.4-green" /> 
+<img src="https://img.shields.io/badge/Version-0.3.5-green" /> 
 <img src="https://img.shields.io/pypi/dm/fb-friend-list-scraper.svg" />
 <a href="https://makeapullrequest.com/"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&color=green" /></a>
 </p>
@@ -52,3 +52,9 @@ examples:
 
 ### NOTE:
 Facebook changes the markup of it's pages regularly, so the script might break from time to time. Please open an issue if something doesn't work and I'll take a look at it. Pull requests are welcome as well.
+
+
+### TODO:
+* Make script check for followers if friend list isn't public.
+* Add more error handling.
+* Add proxy rotation.
