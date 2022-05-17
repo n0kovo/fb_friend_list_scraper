@@ -18,7 +18,7 @@ import getpass
 import re
 from math import ceil
 from random import randint
-from sys import argv, stdout
+from sys import argv, stdout, exit
 from time import sleep
 
 import pyautogecko
@@ -41,6 +41,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 def logprint(text):
     text = f"[cyan][+][/cyan] [blue]{text}[/blue]"
     console.print(text)
+
+def errorprint(text):
+    text = f"[red][!] {text}[/red]"
+    console.print(text)
     
 
 console = Console()
@@ -59,9 +63,9 @@ def print_banner():
 
 """
     for i, line in enumerate(banner.splitlines()):
-        if i is 0:
+        if i == 0:
             line = line.replace("_", "[white]_[/white]")
-        if i is 1:
+        if i == 1:
             line = line.replace("/_", "/[white]_[/white]")
             line = line.replace("__", "[white]__[/white]")
             line = line.replace("_ ", "[white]_ [/white]")
@@ -69,7 +73,7 @@ def print_banner():
         
         if i in [0, 1, 4, 5]:
             console.print(line, style="red", highlight=False)
-        elif i is 3:
+        elif i == 3:
             console.print(line, style="cyan", highlight=False)
         else:
             console.print(line, style="blue", highlight=False)
@@ -124,9 +128,12 @@ def login(driver, email, password):
     try:
         cookie_btn = driver.find_element(By.XPATH, '//*[@value="Only Allow Essential Cookies"]')
     except NoSuchElementException:
-        cookie_btn = driver.find_element(By.XPATH,'//*[@value="Only allow essential cookies"]',)
-        cookie_btn.click()
-
+        try:
+            cookie_btn = driver.find_element(By.XPATH,'//*[@value="Only allow essential cookies"]',)
+            cookie_btn.click()
+        except NoSuchElementException:
+            pass
+            
     email_input = driver.find_element(By.XPATH, '//*[@id="m_login_email"]')
     email_input.send_keys(email)
     password_input = driver.find_element(By.XPATH, '//*[@id="m_login_password"]')
@@ -265,7 +272,12 @@ def do_scrape(driver, email, password, user_to_scrape, outfile_path, args):
         login(driver, email, password)
         
     with progress:
-        total_friends = get_total_friends(driver, user_to_scrape)
+        try:
+            total_friends = get_total_friends(driver, user_to_scrape)
+        except AttributeError:
+            errorprint("Could not get total friends count. Make sure friend list is accesible to you.")
+            exit()
+
         logprint("Requesting friends page")
         driver.get(f"https://m.facebook.com/{user_to_scrape}/friends")
         logprint("Starting...\n")
@@ -341,7 +353,12 @@ def main():
     
     if args.headless:
         firefox_options.headless = True
-    driver = webdriver.Firefox(options=firefox_options, seleniumwire_options=seleniumwire_options)
+    
+    if args.proxy:
+        driver = webdriver.Firefox(options=firefox_options, seleniumwire_options=seleniumwire_options)
+    else:
+        driver = webdriver.Firefox(options=firefox_options)
+        driver.proxy = {}
 
     do_scrape(driver, email, password, user_to_scrape, outfile_path, args)
 
