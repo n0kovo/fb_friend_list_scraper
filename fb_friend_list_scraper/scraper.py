@@ -48,7 +48,7 @@ console = Console()
 
 def print_banner():
     credits = "[blue][italic]by narkopolo[/italic][/blue]"
-    version = "[blue][italic]v0.3.3[/italic][/blue]"
+    version = "[blue][italic]v0.3.4[/italic][/blue]"
     lol = "[grey30](banners are cool, shut up)[/grey30]"
     banner = f"""    ______    ____     _                _____      __                                      
    / __/ /_  / __/____(_)__  ____  ____/ / (_)____/ /____________________  ____  ___  _____
@@ -59,9 +59,9 @@ def print_banner():
 
 """
     for i, line in enumerate(banner.splitlines()):
-        if i == 0:
+        if i is 0:
             line = line.replace("_", "[white]_[/white]")
-        if i == 1:
+        if i is 1:
             line = line.replace("/_", "/[white]_[/white]")
             line = line.replace("__", "[white]__[/white]")
             line = line.replace("_ ", "[white]_ [/white]")
@@ -69,7 +69,7 @@ def print_banner():
         
         if i in [0, 1, 4, 5]:
             console.print(line, style="red", highlight=False)
-        elif i == 3:
+        elif i is 3:
             console.print(line, style="cyan", highlight=False)
         else:
             console.print(line, style="blue", highlight=False)
@@ -80,7 +80,7 @@ def parse_proxy(proxy_string):
     proxy_user = ""
     proxy_pass = ""
     
-    if proxy_string.startswith(("http://", "socks5://")) == False:
+    if proxy_string.startswith(("http://", "socks5://")) is False:
         parser.error("Invalid schema for --proxy. Must be https or socks5.")
         return False
     
