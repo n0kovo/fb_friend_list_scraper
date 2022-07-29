@@ -113,7 +113,14 @@ def change_language(driver):
     try:
         english_btn = driver.find_element(By.XPATH, '//*[@value="English (UK)"]')
     except NoSuchElementException:
-        english_btn = driver.find_element(By.XPATH, '//*[@value="en_gb"]')
+        try:
+            english_btn = driver.find_element(By.XPATH, '//*[@value="en_gb"]')
+        except NoSuchElementException:
+            try:
+                english_btn = driver.find_element(By.XPATH, '//*[@value="en_GB"]')
+            except NoSuchElementException:
+                errorprint("Error finding 'English (UK)' element in language list")
+                exit()
     english_btn.click()
 
 
