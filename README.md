@@ -1,4 +1,4 @@
-<img src="https://user-images.githubusercontent.com/16690056/168868887-0af568d1-fb99-409e-89c6-a779cd74924c.png">
+<img src="https://user-images.githubusercontent.com/16690056/181832615-30f5d44d-307a-4c3d-9cb0-c31fbef1b15c.png">
 
 <p float="left">
 <img src="https://img.shields.io/badge/Built%20with-Python3-red" />
