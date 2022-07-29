@@ -25,7 +25,7 @@ elif argv[-1] == 'clean':
 
 setup(
     name="fb_friend_list_scraper",
-    version="0.3.5",
+    version="0.3.6",
     description="Tool to scrape names and usernames from large friend lists on Facebook, without being rate limited.",
     long_description_content_type='text/markdown',
     long_description=long_description,

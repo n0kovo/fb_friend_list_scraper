@@ -31,6 +31,7 @@ from rich.rule import Rule
 from rich.table import Table
 from seleniumwire import webdriver
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions as EC
@@ -52,7 +53,7 @@ console = Console()
 
 def print_banner():
     credits = "[blue][italic]by narkopolo[/italic][/blue]"
-    version = "[blue][italic]v0.3.5[/italic][/blue]"
+    version = "[blue][italic]v0.3.6[/italic][/blue]"
     lol = "[grey30](banners are cool, shut up)[/grey30]"
     banner = f"""    ______    ____     _                _____      __                                      
    / __/ /_  / __/____(_)__  ____  ____/ / (_)____/ /____________________  ____  ___  _____
@@ -122,6 +123,7 @@ def change_language(driver):
                 errorprint("Error finding 'English (UK)' element in language list")
                 exit()
     english_btn.click()
+    sleep(1)
 
 
 def login(driver, email, password):
@@ -131,6 +133,8 @@ def login(driver, email, password):
     forgot_pw = driver.find_element(By.XPATH, '//*[@id="forgot-password-link"]')
     if forgot_pw.text != 'Forgotten password?':
         change_language(driver)
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.url_contains('login.php'))
 
     try:
         cookie_btn = driver.find_element(By.XPATH, '//*[@value="Only Allow Essential Cookies"]')
@@ -140,7 +144,7 @@ def login(driver, email, password):
             cookie_btn.click()
         except NoSuchElementException:
             pass
-            
+           
     email_input = driver.find_element(By.XPATH, '//*[@id="m_login_email"]')
     email_input.send_keys(email)
     password_input = driver.find_element(By.XPATH, '//*[@id="m_login_password"]')
@@ -155,6 +159,14 @@ def login(driver, email, password):
 def get_total_friends(driver, user_to_scrape):
     logprint("Getting total friends count")
     driver.get(f"https://m.facebook.com/{user_to_scrape}")
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    try:
+        logo_present = EC.presence_of_element_located((By.CLASS_NAME, '_7-1j'))
+        WebDriverWait(driver, 10).until(logo_present)
+    except TimeoutException:
+        errorprint("Timed out waiting for friends count to load")
+        exit()
+
     soup = BeautifulSoup(driver.page_source, "html.parser")
     friends_count_div = soup.find("div", class_="_7-1j")
     friends_count_text = friends_count_div.get_text()

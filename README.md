@@ -2,7 +2,7 @@
 
 <p float="left">
 <img src="https://img.shields.io/badge/Built%20with-Python3-red" />
-<img src="https://img.shields.io/badge/Version-0.3.5-green" /> 
+<img src="https://img.shields.io/badge/Version-0.3.6-green" /> 
 <img src="https://img.shields.io/pypi/dm/fb-friend-list-scraper.svg" />
 <a href="https://makeapullrequest.com/"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&color=green" /></a>
 </p>
